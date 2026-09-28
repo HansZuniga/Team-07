@@ -34,6 +34,7 @@ The grammar concepts studied in class will be used as theoretical support and fo
 
 ---
 
+
 ## 3. Token Categories
 
 The lexer will recognize the following token categories:
@@ -49,3 +50,16 @@ Example:
 
 ```c
 int result = 10;
+
+
+## 4. Keywords and Identifiers
+
+Keywords and identifiers can initially follow a similar lexical pattern.
+
+For this reason, the lexer will first determine whether a lexeme follows the identifier pattern.
+
+After that, it will check whether the lexeme belongs to the reserved-word list.
+
+If it belongs to that list, it will be classified as `KEYWORD`.
+
+Otherwise, it will remain classified as `IDENTIFIER`.
