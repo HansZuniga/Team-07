@@ -50,7 +50,7 @@ Example:
 
 ```c
 int result = 10;
-
+```
 
 ## 4. Keywords and Identifiers
 
