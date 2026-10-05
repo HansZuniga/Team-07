@@ -1,0 +1,83 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[provide=*,spanish]{babel}
+\DeclareUnicodeCharacter{201C}{\textquotedblleft}
+\DeclareUnicodeCharacter{201D}{\textquotedblright}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,tabularx}
+\usepackage{xcolor,tikz}
+\usetikzlibrary{automata,positioning,arrows.meta}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue}
+\usepackage{parskip}
+\definecolor{navy}{RGB}{33,54,75}
+\newcommand{\datos}[1]{\begin{center}{\Large\bfseries\color{navy}#1}\\[8pt]
+Compiladores - Equipo 07\\Yañez Barajas Brandon - Model Designer\\2 de octubre de 2026\end{center}}
+\newcommand{\tok}[1]{\texttt{#1}}
+\begin{document}
+\datos{Especificación de tokens y expresiones regulares}
+\section*{1. Alcance}
+Tomé como base las categorías trabajadas en clase. El lexer leerá una cadena o archivo de izquierda a derecha y registrará categoría, lexema, línea y columna. Los espacios, tabulaciones y saltos de línea se omiten del conteo, pero actualizan la posición. Esta propuesta usa expresiones regulares en Python, sin FLEX.
+
+\section*{2. Patrones definidos}
+Los patrones se aplican en la posición actual de lectura. Las mayúsculas y minúsculas se distinguen. El alfabeto de identificadores se limita a letras ASCII, dígitos y guion bajo.
+\textbf{KEYWORD.} Conjunto reservado: \tok{print, int, return, if, else}. Se reconoce primero el identificador completo y luego se comprueba su pertenencia a este conjunto. Patrón para un lexema completo:
+\begin{verbatim}
+(?:print|int|return|if|else)
+\end{verbatim}
+\textbf{IDENTIFIER.} Primera posición: letra o guion bajo; después se admiten también dígitos.
+\begin{verbatim}
+[A-Za-z_][A-Za-z0-9_]*
+\end{verbatim}
+\textbf{CONSTANT.} Enteros y decimales sin signo. Ambos se reportan bajo la misma categoría.
+\begin{verbatim}
+[0-9]+(?:\.[0-9]+)?
+\end{verbatim}
+\textbf{LITERAL.} Cadenas con comillas rectas o tipográficas emparejadas. No se admiten escapes ni saltos de línea dentro de una cadena.
+\begin{verbatim}
+"[^"\r\n]*"|“[^”\r\n]*”
+\end{verbatim}
+\textbf{OPERATOR.} Los operadores de dos caracteres se colocan antes que los de uno.
+\begin{verbatim}
+==|!=|<=|>=|[=+*/<>-]
+\end{verbatim}
+\textbf{PUNCTUATION.} Paréntesis, llaves, punto y coma y coma.
+\begin{verbatim}
+[(){};,]
+\end{verbatim}
+Uso \tok{PUNCTUATION} como nombre de salida para coincidir con la tarea \#10. Corresponde a la categoría de puntuación denominada \tok{PUNCTUATOR} en el documento anterior. El Developer debe usar un solo nombre de forma consistente.
+
+\newpage
+\section*{3. Ejemplos por categoría}
+\begin{tabularx}{\textwidth}{@{}p{3cm}p{3.6cm}X@{}}
+\toprule Categoría & Ejemplos válidos & Ejemplos que no corresponden\\\midrule
+KEYWORD & \tok{int}, \tok{print} & \tok{intx} y \tok{printf}: identificadores.\\
+IDENTIFIER & \tok{main}, \tok{\_x}, \tok{if2} & \tok{2a}: inicio numérico; \tok{a-b}: tres tokens.\\
+CONSTANT & \tok{10}, \tok{0}, \tok{3.14} & \tok{3.}, \tok{123abc}, \tok{1.2.3}: mal formados.\\
+LITERAL & \tok{"Hola"}, \tok{""} & Cadena sin cerrar o con salto de línea.\\
+OPERATOR & \tok{=}, \tok{>=}, \tok{+} & \tok{\&}, \tok{!}: no definidos.\\
+PUNCTUATION & \tok{(}, \tok{;}, \tok{\}} & \tok{[}, \tok{]}: no definidos.\\\bottomrule
+\end{tabularx}
+Que un ejemplo no pertenezca a una categoría no significa necesariamente que toda la entrada sea un error. Por ejemplo, \tok{a-b} se divide en identificador, operador e identificador.
+
+\section*{4. Prioridad y conflictos}
+Se conserva la coincidencia válida más larga desde la posición actual. Un identificador se lee completo antes de reclasificarlo: \tok{if} es KEYWORD y \tok{if2} es IDENTIFIER. Así se evita separar \tok{intx} como \tok{int} seguido de \tok{x}. \tok{printf} es IDENTIFIER porque no pertenece al conjunto reservado.
+
+En operadores, \tok{>=} y \tok{==} son un solo token; se prueban antes que \tok{>} y \tok{=}. Si se usan patrones numéricos separados, el decimal se prueba antes que el entero. Los signos son operadores independientes: \tok{-10} produce OPERATOR y CONSTANT.
+
+Una cadena se reconoce como una unidad: los espacios y operadores que aparezcan dentro de ella no generan tokens adicionales. Esta versión no contempla comentarios.
+
+\section*{5. Errores y recuperación}
+Antes de aceptar un prefijo numérico válido, se revisa el candidato completo: una secuencia que empieza con dígito y continúa con letras, guion bajo o puntos se consume hasta el siguiente separador u operador. Si no cumple el patrón numérico, se registra como un error completo. Por ejemplo, \tok{123abc}, \tok{3.} y \tok{1.2.3} no se dividen en tokens parcialmente válidos.
+
+Una cadena sin cerrar se consume hasta el salto de línea o fin de archivo y se reporta como error. Un carácter ilegal, como \tok{@}, se registra y se avanza un carácter. Cada error conserva el lexema y su posición inicial. El análisis continúa y los errores no se suman al total de tokens válidos. Las líneas y columnas comienzan en 1; cada carácter, incluida la tabulación, avanza una columna, y el salto de línea reinicia la columna en 1.
+
+\section*{6. Ejemplos del profesor}
+\tok{int a = 10;} genera KEYWORD, IDENTIFIER, OPERATOR, CONSTANT y PUNCTUATION: \textbf{5 tokens}.
+
+\tok{printf(“This is an example”);} genera IDENTIFIER, PUNCTUATION, LITERAL, PUNCTUATION y PUNCTUATION: \textbf{5 tokens}. Ambas líneas juntas producen \textbf{10 tokens válidos}.
+
+Los patrones de identificadores y constantes son la base del modelo AFND/AFD de la tarea \#11. El enunciado menciona ``Tokens: 40'' sin precisar su interpretación; este punto debe confirmarse con el profesor.
+
+\end{document}
