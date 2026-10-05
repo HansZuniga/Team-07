@@ -197,9 +197,11 @@ class Lexer:
                 pos, column = self._advance(pos, column, len(lexeme))
                 continue
 
-            # Identifiers and keywords.
-            if char.isalpha() or char == "_":
-                match = _IDENTIFIER_RE.match(text, pos)
+            # Identifiers and keywords. The pattern itself decides whether an
+            # identifier starts here: str.isalpha() also accepts non-ASCII
+            # letters (e.g. "á") that the IDENTIFIER pattern does not allow.
+            match = _IDENTIFIER_RE.match(text, pos)
+            if match:
                 lexeme = match.group()
                 token_type = "KEYWORD" if lexeme in self.keywords else "IDENTIFIER"
                 self._add_token(token_type, lexeme, line, column)
@@ -207,8 +209,9 @@ class Lexer:
                 continue
 
             # Numeric constants (and malformed numeric candidates).
-            if char.isdigit():
-                candidate = _NUMERIC_CANDIDATE_RE.match(text, pos).group()
+            match = _NUMERIC_CANDIDATE_RE.match(text, pos)
+            if match:
+                candidate = match.group()
                 if _CONSTANT_RE.fullmatch(candidate):
                     self._add_token("CONSTANT", candidate, line, column)
                 else:

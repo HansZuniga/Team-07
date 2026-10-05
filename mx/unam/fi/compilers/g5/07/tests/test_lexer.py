@@ -215,6 +215,25 @@ def test_illegal_character_advances_a_single_position():
     assert [e.lexeme for e in lexer.errors] == ["@"]
 
 
+def test_non_ascii_letter_is_a_single_error():
+    lexer = make_lexer()
+    lexer.tokenize("int á = 10;")
+    assert token_tuples(lexer) == [
+        ("KEYWORD", "int"),
+        ("OPERATOR", "="),
+        ("CONSTANT", "10"),
+        ("PUNCTUATION", ";"),
+    ]
+    assert [(e.lexeme, e.line, e.column) for e in lexer.errors] == [("á", 1, 5)]
+
+
+def test_non_ascii_digit_is_a_single_error():
+    lexer = make_lexer()
+    lexer.tokenize("a = ²;")
+    assert [e.lexeme for e in lexer.errors] == ["²"]
+    assert lexer.get_total_tokens() == 3
+
+
 # ---------------------------------------------------------------------------
 # Line and column tracking
 # ---------------------------------------------------------------------------
