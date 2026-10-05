@@ -1,0 +1,59 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[provide=*,spanish]{babel}
+\DeclareUnicodeCharacter{201C}{\textquotedblleft}
+\DeclareUnicodeCharacter{201D}{\textquotedblright}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,tabularx}
+\usepackage{xcolor,tikz}
+\usetikzlibrary{automata,positioning,arrows.meta}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue}
+\usepackage{parskip}
+\definecolor{navy}{RGB}{33,54,75}
+\newcommand{\datos}[1]{\begin{center}{\Large\bfseries\color{navy}#1}\\[8pt]
+Compiladores - Equipo 07\\Yañez Barajas Brandon - Model Designer\\2 de octubre de 2026\end{center}}
+\newcommand{\tok}[1]{\texttt{#1}}
+\begin{document}
+\datos{Gramática libre de contexto y Left Factoring}
+\section*{1. Ejemplo seleccionado}
+Elegí la entrada del profesor \tok{int a = 10;}. También consideré \tok{int a;} para mostrar dos alternativas con un prefijo común. La CFG describe la secuencia de tokens: $id$ representa un identificador y $num$ una constante numérica. Ambos son terminales de esta gramática.
+
+\section*{2. Gramática original}
+Defino $G_0=(N_0,T,P_0,S)$, donde:
+\[N_0=\{S\},\qquad T=\{\texttt{int},id,num,\texttt{=},\texttt{;}\}.\]
+El símbolo inicial es $S$ y las producciones son:
+\[S\to\texttt{int}\ id\ \texttt{=}\ num\ \texttt{;}\ \mid\ \texttt{int}\ id\ \texttt{;}.\]
+Cada producción tiene un único no terminal a la izquierda; por ello, la gramática es libre de contexto.
+
+\section*{3. Factorización por la izquierda}
+Las alternativas comparten el prefijo $\texttt{int}\ id$. Separé este prefijo e introduje el no terminal $R$ para representar el resto:
+\[\begin{aligned}S&\to\texttt{int}\ id\ R,\\R&\to\texttt{=}\ num\ \texttt{;}\ \mid\ \texttt{;}.\end{aligned}\]
+La nueva gramática es $G_1=(N_1,T,P_1,S)$, con $N_1=\{S,R\}$ y $P_1$ formado por las reglas anteriores. $T$ y el símbolo inicial se conservan. $R\to\texttt{;}$ no es una producción vacía: genera el punto y coma de la declaración sin inicialización.
+
+\section*{4. Derivaciones}
+Con inicialización:
+\[S\Rightarrow\texttt{int}\ id\ R\Rightarrow\texttt{int}\ id\ \texttt{=}\ num\ \texttt{;}.\]
+Sin inicialización:
+\[S\Rightarrow\texttt{int}\ id\ R\Rightarrow\texttt{int}\ id\ \texttt{;}.\]
+El lexer establece que \tok{a} corresponde a $id$ y \tok{10} a $num$. No se agregan reglas $id\to a$ ni $num\to 10$: la gramática opera sobre categorías de tokens y terminales específicos.
+
+\newpage
+\section*{5. Árbol de derivación}
+\begin{center}\begin{tikzpicture}[level distance=1.5cm,level 1/.style={sibling distance=3cm},level 2/.style={sibling distance=1.5cm},every node/.style={text=navy}]
+\node {$S$} child {node {\texttt{int}}} child {node {$id$}} child {node {$R$} child {node {\texttt{=}}} child {node {$num$}} child {node {\texttt{;}}}};
+\end{tikzpicture}\end{center}
+Las hojas de izquierda a derecha son $\texttt{int},id,\texttt{=},num,\texttt{;}$. Coinciden con la secuencia de la declaración seleccionada.
+
+\section*{6. Comparación y conservación del lenguaje}
+La gramática original genera las dos estructuras siguientes:
+\[L(G_0)=\{\texttt{int}\ id\ \texttt{=}\ num\ \texttt{;},\quad\texttt{int}\ id\ \texttt{;}\}.\]
+En la gramática factorizada, $S$ genera el prefijo común y $R$ permite exactamente los dos sufijos originales. Por lo tanto, $L(G_0)=L(G_1)$. La transformación reorganiza las producciones sin añadir ni eliminar estructuras.
+
+\section*{7. Relación con el proyecto}
+El lexer se implementará mediante expresiones regulares. La CFG describe el orden de los tokens y no depende del mecanismo utilizado para reconocerlos. Los AFND y AFD se conservan como documentación del modelo teórico.
+
+Esta propuesta cubre declaraciones sencillas de tipo \tok{int}; no constituye una gramática completa de C. La tarea presenta la gramática, su transformación y comprobación, sin implicar que el lexer tenga un parser o valide la sintaxis de las entradas.
+
+\end{document}
