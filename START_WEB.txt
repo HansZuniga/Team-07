@@ -1,0 +1,22 @@
+TEAM 07 - LEXICAL ANALYZER WEB INTERFACE
+
+1. Make sure Python 3 is installed.
+2. From this folder run:
+
+   python web/app.py
+
+   On Windows you can also double-click run_web.bat.
+
+3. Open this address in your browser:
+
+   http://127.0.0.1:5000
+
+The web page uses the original lexer at:
+mx/unam/fi/compilers/g5/07/src/main/lexer.py
+
+It does NOT execute the source code entered by the user. It only performs lexical analysis.
+
+TESTED:
+- Original lexer suite: 29 passed
+- Web integration tests: 3 passed
+- Combined total: 32 passed

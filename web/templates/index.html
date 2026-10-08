@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Team 07 lexical analyzer - Compilers, Faculty of Engineering, UNAM">
+  <title>Team 07 | Lexical Analyzer</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <header class="institutional-header">
+    <div class="header-inner">
+      <img class="institution-logo unam-logo" src="/static/img/unam.png" alt="UNAM shield">
+      <div class="institution-copy">
+        <p class="eyebrow">UNIVERSIDAD NACIONAL AUTÓNOMA DE MÉXICO</p>
+        <h1>Faculty of Engineering</h1>
+        <p class="course-line">Compilers · Lexical Analyzer · Delivery 1</p>
+        <p class="meta-line">Group 5 · Team 07 · Professor: René Adrián Dávila Pérez</p>
+      </div>
+      <img class="institution-logo fi-logo" src="/static/img/fi.png" alt="Faculty of Engineering shield">
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero-card" aria-labelledby="analyzer-title">
+      <div class="hero-copy">
+        <span class="section-kicker">TEAM 07 · PYTHON ENGINE</span>
+        <h2 id="analyzer-title">Lexical Analyzer</h2>
+        <p>Enter source code to identify lexemes and classify them into tokens using the original Team 07 Python lexer.</p>
+      </div>
+      <div class="engine-badge" title="The browser sends source text to Flask, which invokes the original Python Lexer class.">
+        <span class="status-dot" aria-hidden="true"></span>
+        Original Python Lexer
+      </div>
+    </section>
+
+    <section class="workspace-grid">
+      <article class="panel editor-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-label">SOURCE INPUT</p>
+            <h3>Code to analyze</h3>
+          </div>
+          <span id="charCount" class="char-count">0 / 50,000</span>
+        </div>
+
+        <label class="sr-only" for="sourceCode">Source code</label>
+        <textarea id="sourceCode" spellcheck="false" maxlength="50000" aria-describedby="inputHint">printf("This is an example");
+int a = 10;</textarea>
+        <p id="inputHint" class="input-hint">Source text is analyzed only; it is never executed.</p>
+
+        <div class="editor-actions">
+          <button id="analyzeBtn" class="btn btn-primary" type="button">Analyze Code</button>
+          <button id="exampleBtn" class="btn btn-secondary" type="button">Load Example</button>
+          <button id="fileBtn" class="btn btn-secondary" type="button">Load File</button>
+          <input id="fileInput" class="sr-only" type="file" accept=".c,.h,.txt,.py,.java,.cpp,.cc,.js,.ts,text/plain">
+          <button id="clearBtn" class="btn btn-ghost" type="button">Clear</button>
+        </div>
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+      </article>
+
+      <aside class="panel reference-panel" aria-labelledby="reference-title">
+        <div class="panel-heading compact">
+          <div>
+            <p class="panel-label">REFERENCE</p>
+            <h3 id="reference-title">Token Categories</h3>
+          </div>
+        </div>
+        <div class="token-list" aria-label="Token categories">
+          <span>KEYWORD</span><span>IDENTIFIER</span><span>OPERATOR</span>
+          <span>CONSTANT</span><span>LITERAL</span><span>PUNCTUATION</span>
+        </div>
+        <div class="how-it-works">
+          <p class="panel-label">HOW IT WORKS</p>
+          <ol>
+            <li>Source Code</li>
+            <li>Lexical Scanning</li>
+            <li>Pattern Recognition</li>
+            <li>Tokens + Errors</li>
+          </ol>
+        </div>
+        <div class="implementation-note">
+          <p class="panel-label">IMPLEMENTATION</p>
+          <p><strong>Engine:</strong> Team 07 Python Lexer</p>
+          <code>mx/unam/fi/compilers/g5/07/src/main/lexer.py</code>
+          <a class="text-link" href="https://github.com/HansZuniga/Team-07/blob/main/mx/unam/fi/compilers/g5/07/src/main/lexer.py" target="_blank" rel="noopener noreferrer">View lexer source ↗</a>
+        </div>
+      </aside>
+    </section>
+
+    <section id="resultsSection" class="results-section" aria-labelledby="results-title">
+      <div class="section-title-row">
+        <div>
+          <span class="section-kicker">ANALYSIS OUTPUT</span>
+          <h2 id="results-title">Results</h2>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <article class="summary-card">
+          <span>Total Tokens</span>
+          <strong id="tokenTotal">—</strong>
+        </article>
+        <article class="summary-card">
+          <span>Lexical Errors</span>
+          <strong id="errorTotal">—</strong>
+        </article>
+        <article class="summary-card status-card">
+          <span>Status</span>
+          <strong id="analysisStatus">Ready</strong>
+        </article>
+      </div>
+
+      <article class="panel table-panel">
+        <div class="panel-heading compact">
+          <div>
+            <p class="panel-label">RECOGNIZED TOKENS</p>
+            <h3>Token Stream</h3>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>TYPE</th><th>LEXEME</th><th>LINE</th><th>COLUMN</th></tr>
+            </thead>
+            <tbody id="tokenBody">
+              <tr class="empty-row"><td colspan="4">Run the analyzer to display recognized tokens.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article id="errorsPanel" class="panel table-panel errors-panel" hidden>
+        <div class="panel-heading compact">
+          <div>
+            <p class="panel-label error-label">LEXICAL ERRORS</p>
+            <h3>Unrecognized Input</h3>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>LEXEME</th><th>LINE</th><th>COLUMN</th></tr>
+            </thead>
+            <tbody id="errorBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="project-info panel" aria-labelledby="project-title">
+      <div class="project-copy">
+        <span class="section-kicker">ACADEMIC PROJECT</span>
+        <h2 id="project-title">Team 07</h2>
+        <p>Compilers · Group 5 · Delivery 1</p>
+        <p>Professor: René Adrián Dávila Pérez</p>
+        <a class="btn btn-secondary repo-btn" href="https://github.com/HansZuniga/Team-07" target="_blank" rel="noopener noreferrer">View Repository on GitHub ↗</a>
+      </div>
+      <div class="team-grid">
+        <div><strong>Parra Bello Carlos Enrique</strong><span>Developer</span></div>
+        <div><strong>Bojórquez Covarrubias Evans Martin</strong><span>Writing</span></div>
+        <div><strong>Arzate Ríos Adrian Axel</strong><span>Presenter</span></div>
+        <div><strong>Yáñez Barajas Brandon</strong><span>Model Designer</span></div>
+        <div><strong>Zúñiga García Hans David</strong><span>Manager</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Universidad Nacional Autónoma de México · Facultad de Ingeniería · Team 07 · 2026</p>
+  </footer>
+
+  <script src="/static/js/app.js" defer></script>
+</body>
+</html>
